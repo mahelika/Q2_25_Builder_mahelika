@@ -71,6 +71,7 @@ pub struct Transaction<'info> {
 
     pub vault_state: Account<'info, VaultState>,
     #[account(
+        mut, // Added mut here to allow writing to this account
         seeds = [b"vault", user.key().as_ref()],
         bump = vault_state.vault_bump
     )]
@@ -125,15 +126,15 @@ pub struct Close<'info> {
     #[account(
         mut, // so it can be closed
         seeds = [b"state", user.key().as_ref()], 
-        bump = vault_state.vault_bump,
+        bump = vault_state.state_bump, // Fixed: should be state_bump, not vault_bump
         close = user //once closed, the remaining rent in this account is sent to user
     )]
     pub vault_state: Account<'info, VaultState>,
 
     //the vault PDA holding SOL
     #[account(
-        mut, // mut bcoz we’re withdrawing its balance
-        seeds = [vault_state.key().as_ref()],
+        mut, // mut bcoz we're withdrawing its balance
+        seeds = [b"vault", user.key().as_ref()],
         bump = vault_state.vault_bump
     )]
     pub vault: SystemAccount<'info>, //holds SOL, not a token account
@@ -144,7 +145,7 @@ impl<'info> Close<'info> {
     pub fn close(&mut self) -> Result<()> {
         let vault_balance = self.vault.lamports();
 
-        // if the vault isn’t empty, transfer all SOL from vault-> user.
+        // if the vault isn't empty, transfer all SOL from vault-> user.
         if vault_balance > 0 {
             let cpi_program = self.system_program.to_account_info();
             let cpi_accounts = Transfer {
@@ -152,10 +153,11 @@ impl<'info> Close<'info> {
                 to: self.user.to_account_info(),
             };
 
-            // use vault_state PDA key as the seed for signing (since vault PDA is derived from it)
-            let vault_state_key = self.vault_state.to_account_info().key();
+            // Fixed: Use correct seeds for vault PDA
+            let user_key = self.user.key();
             let seeds = &[
-                vault_state_key.as_ref(),
+                b"vault",
+                user_key.as_ref(),
                 &[self.vault_state.vault_bump],
             ];
             let user_seeds = &[&seeds[..]];
@@ -179,5 +181,3 @@ pub struct VaultState {
 impl Space for VaultState {
     const INIT_SPACE: usize = 8 + 1 + 1; //8 bytes for acc discriminator (identifies acc type) 
 }
-
-//unit testing krna hai.
