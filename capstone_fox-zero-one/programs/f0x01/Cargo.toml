@@ -1,0 +1,26 @@
+[package]
+name = "f0x01"
+version = "0.1.0"
+description = "A decentralized Pomodoro protocol built on Solana"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "f0x01"
+
+[features]
+default = []
+cpi = ["no-entrypoint"]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+idl-build = [
+    "anchor-lang/idl-build",
+    "anchor-spl/idl-build",
+]
+# custom-heap = []
+
+[dependencies]
+anchor-lang = {version = "0.31.1", features = ["init-if-needed"]}
+anchor-spl = {version = "0.31.1", features = ["metadata"]}
+# proc-macro2 = "1.0.95"
