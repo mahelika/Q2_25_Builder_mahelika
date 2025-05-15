@@ -1,0 +1,3 @@
+[submodule "fox-zero-one"]
+	path = fox-zero-one
+	url = https://github.com/mahelika/fox-zero-one.git
