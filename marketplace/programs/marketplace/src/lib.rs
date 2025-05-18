@@ -13,7 +13,7 @@ pub use state::*;
 declare_id!("G7nTVd8Nh2ecMTjB3x2Nkcnxmi1uioMiG2PyYuTrg772");
 
 #[program]
-pub mod anchor_marketplace {
+pub mod marketplace {
     use super::*;
 
     pub fn initialize(ctx: Context<Initialize>, name: String, fee: u16) -> Result<()> {
